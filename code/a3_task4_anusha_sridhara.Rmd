@@ -54,11 +54,47 @@ naples_reef <- urchins_clean_naples %>%  #Create new file named naples_reef from
   mutate(Date = mdy(date)) %>% #add a new column Date and arrange in ymd style and 
   mutate(Year = year(Date)) %>% #add a new column of data consisting only of date and
   filter(common_name == "Purple Urchin", site=="NAPL", Year=="2010") #filter data to contain only purple urchins from NAPL and from the year 2010
+
+head(naples_reef)
 ```
+
+## Task 3b - QQ Plots indicating the size distribution of purple urchins at Naples in 2010 for different treatment conditions 
+```{r}
+ggplot(data = naples_reef, aes(sample=size))+
+  geom_qq()+
+  facet_wrap(~treatment)+
+  theme_minimal()+
+  labs(x= "Sizes of Urchins in cms",
+       y = "No of Sea Urchins",
+       title = "Distribution of Purple urchins across treatment conditions at SBC LTER long-term
+       kelp removal experiment sites")
+```
+
+
 
 ```{r}
-
+naples_reef_treatment %>% 
+  group_by(treatment) %>% 
+  summarize(mean_cms = mean(size, na.rm = TRUE),
+            median_cms = median(size, na.rm = TRUE),
+            sd_cms = sd(size, na.rm = TRUE),
+            sample_size = n()) %>% 
+  kable(col.names = c("Common_name",
+                      "Mean_size_cms",
+                      "Median_size_cms",
+                      "Standard_deviation_cms",
+                      "Sample_size")) %>% 
+  kable_styling(full_width = FALSE)
 ```
+
+
+
+
+
+
+
+
+
 
 
 ## R Markdown
