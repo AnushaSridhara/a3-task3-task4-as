@@ -1,0 +1,150 @@
+---
+title: "a3_task3_anusha_sridhara.Rmd"
+author: "Anusha Sridhara"
+date: "10/23/2021"
+output: html_document
+---
+
+## Overview ##
+The following data describes the size frequency distribution of red and purple sea urchins at SBC LTER long-term kelp removal experiment sites. The kelp removal experiment was initiated in 2008 at selected reef sites along the maincoast of the Santa Barbara Channel. The following codes wrangle and visualize data for the above mentioned dataset from [Santa Barbara Coastal LTER](https://sbclter.msi.ucsb.edu/data/catalog/package/?package=knb-lter-sbc.26)
+
+** Data Citation **: Reed, D, R. Miller. 2021. SBC LTER: Reef: Long-term experiment: Kelp removal: Urchin size frequency distribution ver 21. Environmental Data Initiative. https://doi.org/10.6073/pasta/fd564dddfe7b77fe9e4bd8417f166057. Accessed 2021-10-23.
+
+## Installing libraries
+```{r setup, include=FALSE, message = FALSE, warning=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+
+## Installing libraries ##
+library(tidyverse)
+library(dplyr)
+library(here)
+library(ggplot2)
+library(janitor)
+library(kableExtra)
+library(lubridate)
+library(car)
+```
+
+## Read in the data ##
+
+```{r}
+## Reading the data of Urchins ##
+urchins <- read_csv(here("data", "urchins.csv"))
+```
+
+## For reference, the first 6 lines of the dataset are shown below
+```{r}
+##Return the first 6 lines:
+head(urchins)
+```
+
+## Data Cleaning ##
+
+## Converting the names in column to lowercase
+```{r}
+##column names converted to lower snake case
+urchins_clean <- urchins %>% clean_names()
+```
+
+## a) Section 1 ##
+
+### i. Data Visualization 
+### Comparing the distribution of sizes between purple and red urchins with the help of a histogram 
+```{r}
+ggplot(data = urchins_clean, aes(x=size))+
+  geom_histogram(fill = "goldenrod3",
+                 color = "red",
+                 bins=10)+
+  theme_minimal()+
+  facet_wrap(~common_name)+
+  labs(x= "Sizes of Urchins in cms",
+       y = "No of Sea Urchins",
+       title = "Distribution of Purple and Red urchins at SBC LTER long-term
+       kelp removal experiment sites")
+```
+
+#Fig 1: Sizes of Purple and Red Sea Urchins. The graph above discusses the distribution of purple and red sea urchins found at SBC LTER long-term kelp removal experiment sites
+
+### ii. Descriptive Statistics Table #
+
+#### Table 1: Statistical summary of Sea Urchins :Table below summarizes data of sea urchins found at SBC LTER long-term kelp removal experiment sites
+```{r}
+urchins_clean %>% 
+  group_by(common_name) %>% 
+  summarize(mean_cms = mean(size, na.rm = TRUE),
+            median_cms = median(size, na.rm = TRUE),
+            sd_cms = sd(size, na.rm = TRUE),
+            sample_size = n()) %>% 
+  kable(col.names = c("Common_name",
+                      "Mean_size_cms",
+                      "Median_size_cms",
+                      "Standard_deviation_cms",
+                      "Sample_size")) %>% 
+  kable_styling(full_width = FALSE)
+```
+#### The sample size for both the kinds of urchins are less than 30, which may not be sufficient to represent the population
+
+
+#### iii) Interpretation of the Statistical Summary: Data clearly indicates that the size of Red Sea Urchins are bigger(in centimeters) than the Purple Sea Urchins and are seen more frequently at the experiment sites. However, the purple sea urchins tend to be of similar size compared to the red sea urchins, whose size could tend to be bigger than the average
+
+
+## b. Section 2  ##
+
+### i. Exploring Purple Urchin counts by Site and Year ###
+```{r}
+purple_urchins <- urchins_clean %>% 
+  filter(common_name == "Purple Urchin") %>% 
+  mutate(date_converted = mdy(date)) %>% 
+  mutate(Year = year(date_converted)) %>% 
+  mutate(site_full = case_when(
+    site %in% c("NAPL") ~ "Naples Reef", #Naples Reef if site is NAPL
+    site %in% c("AQUE") ~ "Arroyo Quemado Reef", #Arroyo Quemado Reef if site is AQUE
+    site %in% c("CARP") ~ "Carpinteria Reef", #Carpinteria Reef is site is CARP
+    site %in% c("MOHK") ~ "Mohawk Reef", #Mohawk Reef if site is MOHK
+    site %in% c("IVEE") ~ "Isla Vista Reef")) #Isla Vista Reef is site is IVEE
+
+head(purple_urchins)
+```
+
+### ii. Graph containing total number of purple urchins observed by site and year ###
+```{r}
+purple_urchins_site_year <- purple_urchins %>% 
+  group_by(site,Year) %>% 
+  summarise(Number=n())
+```
+
+```{r}
+ggplot(data = purple_urchins_site_year, aes(x= Year, y=Number, color=site))+
+  geom_line()+
+  scale_x_continuous(breaks = c(2008:2020))+
+  ylim(0,1500)+
+  theme_classic()+
+    labs(x= "Years",
+         y = "No of Sea Urchins",
+         title = "Size Distribution of Purple urchins at SBC LTER long-term
+       kelp removal experiment sites per year")
+```
+# Fig 2: Size distribution of Purple Urchins at SBC LTER. The graph above discusses the frequency of purple sea urchins found across SBC LTER long-term kelp removal experiment sites and across years
+
+#### iv. The treatment conditions at the sites have not been segregated in this graph and therefore does not reflect the changes in the urchin population 
+
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.

@@ -1,0 +1,82 @@
+---
+title: "a3_task4_anusha_sridhara"
+author: "Anusha Sridhara"
+date: "10/24/2021"
+output: html_document
+---
+
+## Overview ##
+The following data describes the size frequency distribution of red and purple sea urchins at SBC LTER long-term kelp removal experiment sites. The kelp removal experiment was initiated in 2008 at selected reef sites along the maincoast of the Santa Barbara Channel. The following codes wrangle and visualize data for the above mentioned dataset from [Santa Barbara Coastal LTER](https://sbclter.msi.ucsb.edu/data/catalog/package/?package=knb-lter-sbc.26)
+
+** Data Citation **: Reed, D, R. Miller. 2021. SBC LTER: Reef: Long-term experiment: Kelp removal: Urchin size frequency distribution ver 21. Environmental Data Initiative. https://doi.org/10.6073/pasta/fd564dddfe7b77fe9e4bd8417f166057. Accessed 2021-10-23.
+
+
+## Installing libraries 
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+## Installing libraries ##
+library(tidyverse)
+library(dplyr)
+library(here)
+library(ggplot2)
+library(janitor)
+library(kableExtra)
+library(lubridate)
+library(car)
+```
+
+## Read in the data ##
+```{r}
+## Reading the data of Urchins ##
+urchins <- read_csv(here("data", "urchins.csv"))
+```
+
+## For reference, the first 6 lines of the dataset are shown below
+```{r}
+##Return the first 6 lines:
+head(urchins)
+```
+
+## Data Cleaning ##
+
+## Converting the names in column to lowercase
+```{r}
+urchins_clean_naples <- urchins %>% clean_names()
+```
+
+
+## Task 3a - Wrangling the data to include only Naples Reef observations for purple urchins observed in 2010
+
+```{r}
+naples_reef <- urchins_clean_naples %>%  #Create new file named naples_reef from urchins_clean_naples and 
+  mutate(Date = mdy(date)) %>% #add a new column Date and arrange in ymd style and 
+  mutate(Year = year(Date)) %>% #add a new column of data consisting only of date and
+  filter(common_name == "Purple Urchin", site=="NAPL", Year=="2010") #filter data to contain only purple urchins from NAPL and from the year 2010
+```
+
+```{r}
+
+```
+
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
